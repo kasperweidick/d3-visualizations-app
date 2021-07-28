@@ -1,7 +1,6 @@
 const fetchText = async (url:string): Promise<any> => {
     const response = await fetch(url)
-    const text = await response.text()
-    return text
+    return await response.text()
 }
 
 export default fetchText
