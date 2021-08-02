@@ -1,62 +1,67 @@
-import {useState, useEffect} from 'react'
-import {csv, arc, pie} from 'd3'
+import { useState, useEffect } from 'react'
+import { csv, scaleBand, scaleLinear, max } from 'd3'
+import { DSVRowArray } from 'd3'
 
-
-
-// interface IStyledDiv {
-//     inputColor: string
+// interface Data {
+//     Keyword: string
+//     Specification: string
+//     'RGB hex value': string
 // }
 
-const width=960
-const height=500
-const centerX = width/2
-const centerY = height/2
+const width = 960
+const height = 500
 
-const pieArc = arc()
-    .innerRadius(0)
-    .outerRadius(width)
+const margin = { top: 20, right: 20, bottom: 20, left: 20 }
 
-// const StyledDiv = styled.div<IStyledDiv>`
-// background-color: ${props => props.inputColor || "palevioletred"};
-// height: 4px;
-// width: 960px;
-// `
-
+const innerHeight = height - margin.top - margin.bottom
+const innerWidth = width - margin.right - margin.bottom
 
 function App() {
-    const [data, setData] = useState<any>()
-    
-    const csvUrl = 'https://gist.githubusercontent.com/kasperweidick/31adaa4f29ba0469c3b00835fd75a624/raw/CSS_colors.csv'
-    
+    const [data, setData] = useState<Array<any>>()
+
+    const csvUrl =
+        'https://gist.githubusercontent.com/kasperweidick/baf467a5a6680a6bf9d30b84c7234c5c/raw/605c54080c7a93a417a3cea93fd52e7550e76500/UN_Population_2019.csv'
+
     useEffect(() => {
-        csv(csvUrl).then(data => 
-            {setData(data)
-            console.log(data[0])
-            })
-        }, [])
-        
-        if (!data) {
-            return (<h1>Loading...</h1>)
+        const row = (d: any) => {
+            d['Population'] = +d['2020']
+            return d
         }
-        
-    const colorPie = pie()
-        .value(1)
+        csv(csvUrl, row).then((data) => {
+            setData(data.slice(0, 10))
+            console.log(data.slice(0, 10))
+        })
+    }, [])
+
+    if (!data) {
+        return <h1>Loading...</h1>
+    }
+
+    const yScale: any = scaleBand()
+        .domain(data.map((d: any) => d['Country']))
+        .range([0, innerHeight])
+
+    const xScale: any = scaleLinear()
+        .domain([0, max(data, (d) => d['Population'])])
+        .range([0, innerWidth])
 
     return (
-    <svg width={width} height={height}>
-        <g transform={`translate(${centerX}, ${centerY})`} >
-        {colorPie(data)
-        .map( (d:any) => (
-                <path
-                    key={d.data['Keyword']}
-                    fill={d.data['RGB hex value']} 
-                    d={pieArc(d) || ''}
-                />  
-            ))
-        }
-            
-        </g>
-    </svg> 
-    )}
+        <svg width={width} height={height}>
+            <g
+                transform={`translate(${margin.left}, ${margin.top})`}
+            >
+                {data.map((d, i) => (
+                    <rect
+                        x={0}
+                        y={yScale(d['Country'])}
+                        width={xScale(d['Population'])}
+                        height={yScale.bandwidth()}
+                        key={i}
+                    />
+                ))}
+            </g>
+        </svg>
+    )
+}
 
-export default App;
+export default App
