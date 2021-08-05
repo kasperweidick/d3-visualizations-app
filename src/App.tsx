@@ -1,62 +1,50 @@
-import {useState, useEffect} from 'react'
-import {csv, arc, pie} from 'd3'
+// import { useState, useEffect } from 'react'
+import { scaleBand, scaleLinear, max, ScaleBand, ScaleLinear } from 'd3'
+import useData from './components/useData'
+import AxisBottom from './components/AxisBottom'
+import AxisLeft from './components/AxisLeft'
 
+const width = 960
+const height = 500
 
+const margin = { top: 20, right: 20, bottom: 20, left: 200 }
 
-// interface IStyledDiv {
-//     inputColor: string
-// }
-
-const width=960
-const height=500
-const centerX = width/2
-const centerY = height/2
-
-const pieArc = arc()
-    .innerRadius(0)
-    .outerRadius(width)
-
-// const StyledDiv = styled.div<IStyledDiv>`
-// background-color: ${props => props.inputColor || "palevioletred"};
-// height: 4px;
-// width: 960px;
-// `
-
+const innerHeight = height - margin.top - margin.bottom
+const innerWidth = width - margin.right - margin.bottom
 
 function App() {
-    const [data, setData] = useState<any>()
-    
-    const csvUrl = 'https://gist.githubusercontent.com/kasperweidick/31adaa4f29ba0469c3b00835fd75a624/raw/CSS_colors.csv'
-    
-    useEffect(() => {
-        csv(csvUrl).then(data => 
-            {setData(data)
-            console.log(data[0])
-            })
-        }, [])
-        
-        if (!data) {
-            return (<h1>Loading...</h1>)
-        }
-        
-    const colorPie = pie()
-        .value(1)
+    const data = useData()
+
+    if (!data) {
+        return <h1>Loading...</h1>
+    }
+
+    const yScale: ScaleBand<string> = scaleBand()
+        .domain(data.map((d) => d['Country']))
+        .range([0, innerHeight])
+
+    const xScale: ScaleLinear<number, number, never> = scaleLinear()
+        .domain([0, max(data, (d) => d['Population'])])
+        .range([0, innerWidth])
+    console.log(xScale)
 
     return (
-    <svg width={width} height={height}>
-        <g transform={`translate(${centerX}, ${centerY})`} >
-        {colorPie(data)
-        .map( (d:any) => (
-                <path
-                    key={d.data['Keyword']}
-                    fill={d.data['RGB hex value']} 
-                    d={pieArc(d) || ''}
-                />  
-            ))
-        }
-            
-        </g>
-    </svg> 
-    )}
+        <svg width={width} height={height}>
+            <g transform={`translate(${margin.left}, ${margin.top})`}>
+                <AxisBottom xScale={xScale} innerHeight={innerHeight} />
+                <AxisLeft yScale={yScale} />
+                {data.map((d) => (
+                    <rect
+                        key={d['Country']}
+                        x={0}
+                        y={yScale(d['Country'])}
+                        width={xScale(d['Population'])}
+                        height={yScale.bandwidth()}
+                    />
+                ))}
+            </g>
+        </svg>
+    )
+}
 
-export default App;
+export default App
