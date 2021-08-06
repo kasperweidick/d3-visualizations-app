@@ -8,9 +8,14 @@ import React from 'react'
 interface AxisBottomProps {
     xScale: ScaleLinear<number, number, never>
     innerHeight: number
+    tickFormat: any
 }
 
-const AxisBottom: React.FC<AxisBottomProps> = ({ xScale, innerHeight }) => {
+const AxisBottom: React.FC<AxisBottomProps> = ({
+    xScale,
+    innerHeight,
+    tickFormat,
+}) => {
     return (
         <>
             {xScale.ticks().map((tickValue) => (
@@ -18,9 +23,14 @@ const AxisBottom: React.FC<AxisBottomProps> = ({ xScale, innerHeight }) => {
                     key={tickValue}
                     transform={`translate(${xScale(tickValue)}, 0)`}
                 >
-                    <line y2={innerHeight} stroke='black' />
-                    <text textAnchor='middle' y={innerHeight + 3} dy='0.71em'>
-                        {tickValue}
+                    <line y2={innerHeight} stroke='#C0C0BB' />
+                    <text
+                        className='fill-current text-primary font-poppins'
+                        textAnchor='middle'
+                        y={innerHeight + 3}
+                        dy='0.71em'
+                    >
+                        {tickFormat(tickValue)}
                     </text>
                 </g>
             ))}

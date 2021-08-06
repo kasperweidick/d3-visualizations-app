@@ -82,6 +82,7 @@ interface MarksProps {
     yScale: ScaleBand<string>
     xValue: any
     yValue: any
+    toolTipFormat: any
 }
 
 const Marks: React.FC<MarksProps> = ({
@@ -90,17 +91,21 @@ const Marks: React.FC<MarksProps> = ({
     yScale,
     xValue,
     yValue,
+    toolTipFormat,
 }) => {
     return (
         <>
             {data.map((d) => (
                 <rect
+                    className='fill-current text-green'
                     key={yValue(d)}
                     x={0}
                     y={yScale(yValue(d))}
                     width={xScale(xValue(d))}
                     height={yScale.bandwidth()}
-                />
+                >
+                    <title>{toolTipFormat(xValue(d))}</title>
+                </rect>
             ))}
         </>
     )
