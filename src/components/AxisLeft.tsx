@@ -11,6 +11,7 @@ const AxisLeft: React.FC<AxisLeftProps> = ({ yScale }) => {
             {yScale.domain().map((tickValue) => (
                 <text
                     key={tickValue}
+                    className='fill-current text-primary font-poppins'
                     textAnchor='end'
                     dy='0.32em'
                     x={-3}
